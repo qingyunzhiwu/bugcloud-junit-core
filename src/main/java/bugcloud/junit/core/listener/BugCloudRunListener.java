@@ -38,18 +38,27 @@ public class BugCloudRunListener extends RunListener {
 		if (bugCloudTest == null) {
 			return;
 		}
-		logger.info("=========================================");
-		logger.info("appKey:" + bugCloudTest.appKey());
-		logger.info("appSecret:" + bugCloudTest.appSecret());
-		logger.info("pusher:" + bugCloudTest.pusher());
-		logger.info("handler:" + bugCloudTest.handler());
+		StringBuffer sb = new StringBuffer();
+		sb.append("\nTest Class:" + this.testClass.getName() + " 开始测试=========================================");
+		sb.append("\n run time:" + result.getRunTime());
+		sb.append("\n run count:" + result.getRunCount());
+		sb.append("\n ignore count:" + result.getIgnoreCount());
+		sb.append("\n failure count:" + result.getFailureCount());
+		sb.append("\n---------------------------------------------------");
+		sb.append("\n appKey:" + bugCloudTest.appKey());
+		sb.append("\n appSecret:" + bugCloudTest.appSecret());
+		sb.append("\n pusher:" + bugCloudTest.pusher());
+		sb.append("\n handler:" + bugCloudTest.handler());
+		sb.append("\n---------------------------------------------------");
 		for (Failure failure : result.getFailures()) {
-			logger.info("测试失败结果： " + failure.toString());
+			sb.append("\n 测试失败结果： " + failure.toString());
 		}
 
 		// 如果不推送，就直接返回。
-		if (bugCloudTest.isPush() == false)
+		if (bugCloudTest.isPush() == false) {
+			sb.append(" Test Class:" + this.testClass + " 测试完成=========================================");
 			return;
+		}
 
 		OkHttpClient client = new OkHttpClient();
 		JSONObject json = new JSONObject();
@@ -72,18 +81,20 @@ public class BugCloudRunListener extends RunListener {
 
 		try (Response response = client.newCall(request).execute()) {
 			if (response.code() == 200) {
-				logger.info("提交问题接口完成,返回body:" + response.body().string());
+				sb.append("\n 提交问题接口完成,返回body:" + response.body().string());
 			} else {
-				logger.error("提交问题接口失败\n state code:" + response.code() + "\n body:" + response.body().string());
+				sb.append("\n 提交问题接口失败\n state code:" + response.code() + "\n body:" + response.body().string());
 			}
 		} catch (Exception e) {
-			logger.error("提交问题接口失败\n local error:" + e.getMessage());
+			sb.append("\n 提交问题接口失败\n local error:" + e.getMessage());
 			if (bugCloudTest.isAssertPushException()) {
 				throw e;
 			}
+		} finally {
+			sb.append("\n Test Class:" + this.testClass.getName() + " 测试完成=========================================");
+			logger.info(sb.toString());
 		}
 
-		logger.info("================测试完成===================");
 		super.testRunFinished(result);
 	}
 }
