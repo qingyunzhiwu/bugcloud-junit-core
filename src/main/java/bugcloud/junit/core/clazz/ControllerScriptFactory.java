@@ -1,4 +1,4 @@
-package bugcloud.junit.core.controller;
+package bugcloud.junit.core.clazz;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -24,6 +24,7 @@ import javassist.bytecode.AnnotationsAttribute;
 import javassist.bytecode.ClassFile;
 import javassist.bytecode.ConstPool;
 import javassist.bytecode.annotation.ClassMemberValue;
+import javassist.bytecode.annotation.StringMemberValue;
 
 public class ControllerScriptFactory {
 //	private static final Log log = LogFactory.getLog(ControllerScriptFactory.class);
@@ -33,9 +34,10 @@ public class ControllerScriptFactory {
 	public ControllerScriptFactory() {
 		this.scriptFactory.put(GetMapping.class, new GetMappingMethodScriptFactory());
 	}
-	
+
 	/**
 	 * 创建测试类
+	 * 
 	 * @param clazz
 	 * @return
 	 * @throws Exception
@@ -48,14 +50,14 @@ public class ControllerScriptFactory {
 		CtClass ctClass = cp.makeClass(longClassName);
 		ClassFile classFile = ctClass.getClassFile();
 		ConstPool constpool = classFile.getConstPool();
-		
+
 		// 添加类注解
 		// 添加@RunWith
-		AnnotationsAttribute attr = new AnnotationsAttribute(constpool,
-				AnnotationsAttribute.visibleTag);
+		AnnotationsAttribute attr = new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
 		javassist.bytecode.annotation.Annotation annRunWith = new javassist.bytecode.annotation.Annotation(
 				"org.junit.runner.RunWith", constpool);
-		annRunWith.addMemberValue("value", new ClassMemberValue("bugcloud.junit.core.BugCloudSpringRunner",classFile.getConstPool()));
+		annRunWith.addMemberValue("value",
+				new ClassMemberValue("bugcloud.junit.core.BugCloudSpringRunner", classFile.getConstPool()));
 		attr.addAnnotation(annRunWith);
 		// 添加@SpringBootTest
 		javassist.bytecode.annotation.Annotation annSpringBootTest = new javassist.bytecode.annotation.Annotation(
@@ -67,45 +69,60 @@ public class ControllerScriptFactory {
 				"org.springframework.test.context.web.WebAppConfigurationh", constpool);
 		attr.addAnnotation(annWebAppConfigurationh);
 		classFile.addAttribute(attr);
+		// 添加@BugCloudTest
+		
+		javassist.bytecode.annotation.Annotation annBugCloudTest = new javassist.bytecode.annotation.Annotation(
+				"bugcloud.junit.core.annotation.BugCloudTest", constpool);
+		annBugCloudTest.addMemberValue("appKey",
+				new StringMemberValue("6585667c-6f18-4c4f-b809-3be1de3b3ca7", classFile.getConstPool()));
+		annBugCloudTest.addMemberValue("appSecret",
+				new StringMemberValue("fce8d3b5-6c9b-4a49-a50b-ad519630c898", classFile.getConstPool()));
+		annBugCloudTest.addMemberValue("pusher",
+				new StringMemberValue("yu", classFile.getConstPool()));
+		annBugCloudTest.addMemberValue("handler",
+				new StringMemberValue("张三", classFile.getConstPool()));
+		attr.addAnnotation(annBugCloudTest);
+		classFile.addAttribute(attr);
 		// 添加@AutoConfigureMockMvc
 		javassist.bytecode.annotation.Annotation annAutoConfigureMockMvc = new javassist.bytecode.annotation.Annotation(
 				"org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc", constpool);
 		attr.addAnnotation(annAutoConfigureMockMvc);
 		classFile.addAttribute(attr);
-		
+
 		StringBuffer body = null;
 		// 添加日志变量
 		CtField ctField = new CtField(cp.get("org.apache.commons.logging.Log"), "log", ctClass);
-        ctField.setModifiers(Modifier.PROTECTED);
+		ctField.setModifiers(Modifier.PROTECTED);
 		ctClass.addField(ctField);
-		
+
 		// 添加WebApplicationContext变量
-		CtField ctWebContextField = new CtField(cp.get("org.springframework.web.context.WebApplicationContext"), "webContext", ctClass);
+		CtField ctWebContextField = new CtField(cp.get("org.springframework.web.context.WebApplicationContext"),
+				"webContext", ctClass);
 		ctWebContextField.setModifiers(Modifier.PROTECTED);
-		AnnotationsAttribute webContextAttr = new AnnotationsAttribute(constpool,AnnotationsAttribute.visibleTag);
+		AnnotationsAttribute webContextAttr = new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
 		javassist.bytecode.annotation.Annotation annAutowired = new javassist.bytecode.annotation.Annotation(
 				"org.springframework.beans.factory.annotation.Autowired", constpool);
 		webContextAttr.addAnnotation(annAutowired);
 		ctWebContextField.getFieldInfo().addAttribute(webContextAttr);
 		ctClass.addField(ctWebContextField);
-				
+
 		// 添加Mock变量测试接口
 		CtField ctMockField = new CtField(cp.get("org.springframework.test.web.servlet.MockMvc"), "mock", ctClass);
 		ctMockField.setModifiers(Modifier.PROTECTED);
 		ctClass.addField(ctMockField);
-		
+
 		// 添加构造函数
 		CtConstructor ctConstructor = new CtConstructor(new CtClass[] {}, ctClass);
 		body = new StringBuffer();
-		body.append("{ this.log=org.apache.commons.logging.LogFactory.getLog(\""+longClassName+"\"); }");
+		body.append("{ this.log=org.apache.commons.logging.LogFactory.getLog(\"" + longClassName + "\"); }");
 		ctConstructor.setBody(body.toString());
 		ctClass.addConstructor(ctConstructor);
-		
+
 		// 添加Before函数(初始化MockMvc)
-		CtMethod beforeMethod = new CtMethod(CtClass.voidType, "beforeMethod", new CtClass[] { }, ctClass);
-		beforeMethod.setBody("mock = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(webContext).build();");
-		AnnotationsAttribute attrBefore = new AnnotationsAttribute(constpool,
-				AnnotationsAttribute.visibleTag);
+		CtMethod beforeMethod = new CtMethod(CtClass.voidType, "beforeMethod", new CtClass[] {}, ctClass);
+		beforeMethod.setBody(
+				"mock = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(webContext).build();");
+		AnnotationsAttribute attrBefore = new AnnotationsAttribute(constpool, AnnotationsAttribute.visibleTag);
 		javassist.bytecode.annotation.Annotation annBefore = new javassist.bytecode.annotation.Annotation(
 				"org.junit.Before", constpool);
 		attrBefore.setAnnotation(annBefore);
@@ -169,7 +186,7 @@ public class ControllerScriptFactory {
 							"org.junit.Test", constpool);
 					annotationsAttribute.setAnnotation(annotation);
 					testMethod.getMethodInfo().addAttribute(annotationsAttribute);
-					
+
 					ctClass.addMethod(testMethod); // 将创建的测试方法添加到测试类中
 				}
 			}

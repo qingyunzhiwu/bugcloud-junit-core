@@ -1,4 +1,4 @@
-package bugcloud.junit.core.controller;
+package bugcloud.junit.core.clazz;
 
 import java.lang.reflect.Method;
 

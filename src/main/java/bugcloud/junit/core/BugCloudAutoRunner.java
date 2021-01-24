@@ -18,12 +18,12 @@ import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import bugcloud.junit.core.annotation.AutoTestScan;
-import bugcloud.junit.core.controller.ControllerScriptFactory;
+import bugcloud.junit.core.clazz.SpringControllerTestClassFactory;
 
 public class BugCloudAutoRunner extends Suite {
 //	private static final Log log = LogFactory.getLog(BugCloudAutoRunner.class);
 	private static Class<?>[] testClasses = null;
-	private static ControllerScriptFactory controllerScriptFactory = new ControllerScriptFactory(); // Controller类脚本工厂
+	private static SpringControllerTestClassFactory controllerScriptFactory = new SpringControllerTestClassFactory(); // Controller类脚本工厂
 
 	public BugCloudAutoRunner(Class<?> klass, RunnerBuilder builder) throws Exception {
 		super(builder, klass, createTestControllerProxyClasses(klass));
@@ -67,12 +67,7 @@ public class BugCloudAutoRunner extends Suite {
 	 * @throws Exception 
 	 */
 	private static Class<?> createProxyClass(Class<?> testCaseClass, Class<?> destTestClass) throws Exception {
-		Class<?> clazz = controllerScriptFactory.createTestClass(destTestClass);
-//		String script = controllerScriptFactory.createClassScript(destTestClass);
-////		log.info("创建类脚本: \n" + script);
-//		String className = destTestClass.getSimpleName() + "Test";
-//		String packageNme = destTestClass.getPackage().getName();
-//		Class<?> clazz = JavaCodeCompileUtils.compile(packageNme + "." + className, script);
+		Class<?> clazz = controllerScriptFactory.createTestClass(testCaseClass,destTestClass);
 		return clazz;
 	}
 
