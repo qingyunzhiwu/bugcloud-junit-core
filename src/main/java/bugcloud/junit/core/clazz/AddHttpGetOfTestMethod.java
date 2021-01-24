@@ -46,19 +46,19 @@ public class AddHttpGetOfTestMethod extends AbstractAddMethodOfTestClass {
 		// 遍历参数
 		ClassPool pool = ClassPool.getDefault();
 		CtClass srcClass = pool.getCtClass(this.srcMethod.getDeclaringClass().getName()); // 获取原始类
-		CtMethod srcMethod = srcClass.getDeclaredMethod(this.srcMethod.getName()); // 获取原始类方法
-		MethodInfo methodInfo = srcMethod.getMethodInfo();
+		CtMethod method = srcClass.getDeclaredMethod(this.srcMethod.getName()); // 获取原始类方法
+		MethodInfo methodInfo = method.getMethodInfo();
 		CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
 		if (codeAttribute != null) {
 			LocalVariableAttribute attr = (LocalVariableAttribute) codeAttribute
 					.getAttribute(LocalVariableAttribute.tag);
-			int paramLen = srcMethod.getParameterTypes().length; // 参数数量
-			Object[][] ans = srcMethod.getParameterAnnotations(); // 获取参数注解
-			int pos = Modifier.isStatic(srcMethod.getModifiers()) ? 0 : 1; // 非静态的成员函数的第一个参数是this
+			int paramLen = method.getParameterTypes().length; // 参数数量
+			Object[][] ans = method.getParameterAnnotations(); // 获取参数注解
+			int pos = Modifier.isStatic(method.getModifiers()) ? 0 : 1; // 非静态的成员函数的第一个参数是this
 			for (int i = 0; i < paramLen; i++) {
 				String paramName = attr.variableName(i + pos); // 参数名称
-				String paramType = srcMethod.getParameterTypes()[i].getName(); // 参数类型
-				String paramValue = HttpUtils.createPropertyValue(paramType);
+				String paramType = method.getParameterTypes()[i].getName(); // 参数类型
+				String paramValue = ParameterService.getInstance().createParameterValue(ctClass.getName(), paramName,paramType);
 				String paramUse = ""; // 参数用途
 				if (ans[i] != null && ans[i].length > 0) {
 					for (Object pa : ans[i]) {

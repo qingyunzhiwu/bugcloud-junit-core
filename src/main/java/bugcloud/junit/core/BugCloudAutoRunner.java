@@ -18,6 +18,7 @@ import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.RestController;
 
 import bugcloud.junit.core.annotation.AutoTestScan;
+import bugcloud.junit.core.clazz.ParameterService;
 import bugcloud.junit.core.clazz.SpringControllerTestClassFactory;
 
 public class BugCloudAutoRunner extends Suite {
@@ -34,7 +35,7 @@ public class BugCloudAutoRunner extends Suite {
 	 * 
 	 * @param testCaseClass 单元测试类
 	 * @return 返回代理类数组
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private static Class<?>[] createTestControllerProxyClasses(Class<?> testCaseClass) throws Exception {
 		if (BugCloudAutoRunner.testClasses == null) {
@@ -46,6 +47,7 @@ public class BugCloudAutoRunner extends Suite {
 				scanPackage = atc.packageName();
 			}
 			Set<Class<?>> controllerClasses = scanControllerClass(scanPackage);
+			ParameterService.getInstance().addParameterCreateClass(testCaseClass, controllerClasses.stream().map(item->item.getName()+"Test").toArray(String[]::new));
 			List<Class<?>> proxyClasses = new ArrayList<>();
 			for (Class<?> clazz : controllerClasses) {
 				Class<?> ctlClass = createProxyClass(testCaseClass, clazz);
@@ -64,10 +66,10 @@ public class BugCloudAutoRunner extends Suite {
 	 * @param testCaseClass
 	 * @param destTestClass 需要测试的Controller类
 	 * @return 测试类
-	 * @throws Exception 
+	 * @throws Exception
 	 */
 	private static Class<?> createProxyClass(Class<?> testCaseClass, Class<?> destTestClass) throws Exception {
-		Class<?> clazz = controllerScriptFactory.createTestClass(testCaseClass,destTestClass);
+		Class<?> clazz = controllerScriptFactory.createTestClass(testCaseClass, destTestClass);
 		return clazz;
 	}
 

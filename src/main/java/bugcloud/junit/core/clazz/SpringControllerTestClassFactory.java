@@ -32,7 +32,7 @@ public class SpringControllerTestClassFactory {
 		String className = clazz.getSimpleName() + "Test"; // 测试类的类名
 		String packageName = clazz.getPackage().getName(); // 测试类的包名
 		String longClassName = packageName + "." + className;// 测试类+包名
-
+		
 		ITestClassFactory factory = new TestClassFactory(className, packageName);
 		// 添加@RunWith注解
 		Map<String, Object> runWithParams = new HashMap<>();
