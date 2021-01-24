@@ -49,7 +49,7 @@ public class ParameterService {
 	 * @return
 	 * @throws Exception
 	 */
-	public String createParameterValue(String useClassName, String parameterName, String paramType) throws Exception {
+	public String createParameterValue(String useClassName,String methodName, String parameterName, String paramType) throws Exception {
 		if (this.createParameterClassMap.containsKey(useClassName)) {
 			Object createInstance = this.createParameterClassMap.get(useClassName); // 获取创建类的实例
 			// 遍历用户写的测试类中的方法，查找是否有定义随机参数的函数，如果有，就用用户函数计算参数值
@@ -60,6 +60,9 @@ public class ParameterService {
 					continue;
 				boolean isMatch = Pattern.matches(rp.className(), useClassName);
 				if (!isMatch && "".equals(rp.className()) == false)
+					continue;
+				isMatch = Pattern.matches(rp.methodName(), methodName);
+				if (!isMatch && "".equals(rp.methodName()) == false)
 					continue;
 				isMatch = Pattern.matches(rp.parameterName(), parameterName);
 				if (!isMatch && "".equals(rp.parameterName()) == false)

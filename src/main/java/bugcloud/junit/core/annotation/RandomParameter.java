@@ -21,6 +21,11 @@ public @interface RandomParameter {
 	 */
 	String className() default "";
 	/**
+	 * 方法名
+	 * @return
+	 */
+	String methodName() default "";
+	/**
 	 * 参数名
 	 * @return
 	 */

@@ -32,7 +32,8 @@ public class AddHttpGetOfTestMethod extends AbstractAddMethodOfTestClass {
 		if (url == null)
 			return null;
 
-		String methodName = "test" + this.srcMethod.getName().substring(0, 1).toUpperCase() + this.srcMethod.getName().substring(1);
+		String methodName = "test" + this.srcMethod.getName().substring(0, 1).toUpperCase()
+				+ this.srcMethod.getName().substring(1);
 		// 创建测试方法
 		CtMethod ctMethod = new CtMethod(CtClass.voidType, methodName, new CtClass[] {}, ctClass);
 		ctMethod.setModifiers(Modifier.PUBLIC);
@@ -58,7 +59,8 @@ public class AddHttpGetOfTestMethod extends AbstractAddMethodOfTestClass {
 			for (int i = 0; i < paramLen; i++) {
 				String paramName = attr.variableName(i + pos); // 参数名称
 				String paramType = method.getParameterTypes()[i].getName(); // 参数类型
-				String paramValue = ParameterService.getInstance().createParameterValue(ctClass.getName(), paramName,paramType);
+				String paramValue = ParameterService.getInstance().createParameterValue(ctClass.getName(),
+						methodName, paramName, paramType);
 				String paramUse = ""; // 参数用途
 				if (ans[i] != null && ans[i].length > 0) {
 					for (Object pa : ans[i]) {
