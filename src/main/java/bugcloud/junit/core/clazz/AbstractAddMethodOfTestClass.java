@@ -79,10 +79,10 @@ public abstract class AbstractAddMethodOfTestClass extends AbstractTestClassDeco
 			method.getMethodInfo().addAttribute(attr);
 		}
 		
-		method.setBody(this.body());
+		method.setBody(this.body(ctClass));
 		ctClass.addMethod(method);
 		return ctClass;
 	}
 
-	public abstract String body();
+	public abstract String body(CtClass ctClass) throws Exception;
 }

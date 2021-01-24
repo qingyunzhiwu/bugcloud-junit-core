@@ -10,31 +10,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 
 public class HttpGetTest extends TestCase {
-//	public void testGet(Method method) {
-//		List<String> urls = new ArrayList<>();
-//		String headUrl = null;
-//		Annotation classAnnotation = method.getDeclaringClass().getAnnotation(RequestMapping.class);
-//		if (classAnnotation != null) {
-//			headUrl = ((RequestMapping) classAnnotation).value()[0];
-//		}
-//		Annotation annotation = method.getAnnotation(GetMapping.class);
-//		if (annotation != null) {
-//			String[] getMappingValues = ((GetMapping) annotation).value();
-//			if (getMappingValues != null) {
-//				for (String shortUrl : getMappingValues) {
-//					urls.clear();
-//					urls.add(headUrl);
-//					urls.add(shortUrl);
-//					try {
-//						HttpGetTest.testGet("http://127.0.0.1:8080/"+HttpUtils.getUrl(urls), method);
-//					} catch (IOException e) {
-//						e.printStackTrace();
-//					}
-//				}
-//			}
-//		}
-//	}
-	
 	public static void testGet(String url,Map<String,String> params) throws IOException {
 		StringBuffer sb = new StringBuffer();
 		if(params!=null) {

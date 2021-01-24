@@ -1,14 +1,27 @@
 package bugcloud.junit.core.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.alibaba.fastjson.JSON;
 
 /**
  * Url资源拼接工具
@@ -17,6 +30,68 @@ import org.springframework.util.StringUtils;
  *
  */
 public class HttpUtils {
+	public static String getUrl(Method method) {
+		List<String> urls = new ArrayList<>();
+		String headUrl = null;
+		String[] getMappingValues = null;
+		Annotation classAnnotation = method.getDeclaringClass().getAnnotation(RequestMapping.class);
+		if (classAnnotation != null) {
+			headUrl = ((RequestMapping) classAnnotation).value()[0];
+		} else {
+			return null;
+		}
+		Annotation annotation = method.getAnnotation(GetMapping.class);
+		if (annotation != null) {
+			getMappingValues = ((GetMapping) annotation).value();
+		}
+		if (annotation == null) {
+			annotation = method.getAnnotation(PostMapping.class);
+			if (annotation != null) {
+				getMappingValues = ((PostMapping) annotation).value();
+			}
+		}
+		if (annotation == null) {
+			annotation = method.getAnnotation(PutMapping.class);
+			if (annotation != null) {
+				getMappingValues = ((PutMapping) annotation).value();
+			}
+		}
+		if (annotation == null) {
+			annotation = method.getAnnotation(DeleteMapping.class);
+			if (annotation != null) {
+				getMappingValues = ((DeleteMapping) annotation).value();
+			}
+		}
+		if (annotation == null) {
+			annotation = method.getAnnotation(RequestMapping.class);
+			if (annotation != null) {
+				RequestMapping rm = (RequestMapping) annotation;
+				boolean isHavsGetMapping = false;
+				for (RequestMethod r : rm.method()) {
+					if (r == RequestMethod.GET) {
+						isHavsGetMapping = true;
+					}
+				}
+				if (isHavsGetMapping) {
+					getMappingValues = ((RequestMapping) annotation).value();
+				}
+			}
+		}
+		if (annotation != null) {
+			if (getMappingValues != null && getMappingValues.length > 0) {
+				for (String shortUrl : getMappingValues) {
+					urls.add(headUrl);
+					urls.add(shortUrl);
+					return HttpUtils.getUrl(urls);
+				}
+			} else {
+				urls.add(headUrl);
+				return HttpUtils.getUrl(urls);
+			}
+		}
+		return null;
+	}
+
 	public static String createPropertyValue(String parameterType) {
 //		if (argType == Signature.class) {
 //	        return signature;
@@ -39,9 +114,11 @@ public class HttpUtils {
 //	        return Optional.ofNullable(parseModel(modelType, signature.request(), null));
 //	    } else {
 //	        return parseModel(argType, signature.request(), null);
-//	    }
-		if (String.class.getName().equals(parameterType)) {
+		switch (parameterType) {
+		case "java.lang.String":
 			return createStringValue();
+		case "java.lang.Integer":
+			return createIntegerValue();
 		}
 		return null;
 	}
@@ -50,14 +127,32 @@ public class HttpUtils {
 		return UUID.randomUUID().toString();
 	}
 
-	public static void testGet(MockMvc mock, String url) throws Exception {
-		String responseString = mock.perform(MockMvcRequestBuilders.get(url) // 请求的url,请求的方法是get
-				.contentType(MediaType.APPLICATION_JSON) // 数据的格式
-				.param("pcode", "root") // 添加参数
-		).andExpect(MockMvcResultMatchers.status().isOk()) // 返回的状态是200
+	private static String createIntegerValue() {
+		return String.valueOf(Math.random() * Integer.MAX_VALUE);
+	}
+
+	public static void testGet(MockMvc mock, String url, Map<?, ?> params) throws Exception {
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.get(url) // 请求的url,请求的方法是get
+				.contentType(MediaType.APPLICATION_JSON); // 数据的格式
+		if (params != null) {
+			for (Map.Entry<?, ?> item : params.entrySet()) {
+				if (item.getValue() == null)
+					continue;
+				builder = builder.param((String) item.getKey(), (String) item.getValue()); // 添加参数
+			}
+		}
+
+		mock.perform(builder).andExpect(MockMvcResultMatchers.status().isOk()) // 返回的状态是200
 				.andDo(MockMvcResultHandlers.print()) // 打印出请求和相应的内容
 				.andReturn().getResponse().getContentAsString(); // 将相应的数据转换为字符串
-		System.out.println("--------返回的json = " + responseString);
+	}
+
+	public static void testPost(MockMvc mock, String url, Map<?, ?> params) throws Exception {
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post(url) // 请求的url,请求的方法是get
+				.contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(params)); // 数据的格式
+		mock.perform(builder).andExpect(MockMvcResultMatchers.status().isOk()) // 返回的状态是200
+				.andDo(MockMvcResultHandlers.print()) // 打印出请求和相应的内容
+				.andReturn().getResponse().getContentAsString(); // 将相应的数据转换为字符串
 	}
 
 	/**
@@ -80,38 +175,11 @@ public class HttpUtils {
 			if (i < cs.size() - 1) {
 				len = s.lastIndexOf("/");
 				if (len == s.length() - 1) {
-					s = s.substring(0,s.length()-1);
+					s = s.substring(0, s.length() - 1);
 				}
 			}
 			sb.append(s);
 		}
 		return sb.toString();
 	}
-
-//	public static void testGet(String url,Map<?,?> params) {
-//		StringBuffer sb = new StringBuffer();
-//		if(params!=null) {
-//			for(Map.Entry<?,?> item : params.entrySet()) {
-//				if(sb.length()==0) {
-//					sb.append("?");
-//				}else {
-//					sb.append("&");
-//				}
-//				sb.append(item.getKey()+"="+item.getValue());
-//			}
-//		}
-//		sb.insert(0, url);
-//		OkHttpClient client = new OkHttpClient();
-//		Request request = new Request.Builder().url(sb.toString()).build();
-//		final Call call = client.newCall(request);
-//		call.enqueue(new Callback() {
-//	        @Override
-//	        public void onFailure(Call call, IOException e) {
-//	        }
-//	 
-//	        @Override
-//	        public void onResponse(Call call, okhttp3.Response response) throws IOException {
-//	        }
-//	    });
-//	}
 }

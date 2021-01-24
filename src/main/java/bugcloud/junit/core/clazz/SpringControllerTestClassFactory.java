@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import bugcloud.junit.core.BugCloudSpringRunner;
 import bugcloud.junit.core.annotation.BugCloudTest;
+import javassist.CtClass;
 
 public class SpringControllerTestClassFactory {
 	public Class<?> createTestClass(Class<?> testClass, Class<?> clazz) throws Exception {
@@ -38,6 +40,8 @@ public class SpringControllerTestClassFactory {
 		factory = new AddAnnotationOfTestClass(factory, RunWith.class, runWithParams);
 		// 添加@WebAppConfiguration注解
 		factory = new AddAnnotationOfTestClass(factory, WebAppConfiguration.class);
+		// 添加@SpringBootTest注解
+		factory = new AddAnnotationOfTestClass(factory, SpringBootTest.class);
 		// 添加@BugCloudTest注解
 		BugCloudTest bugCloudTestAnnotation = testClass.getAnnotation(BugCloudTest.class);
 		Map<String, Object> bugCloudTestParams = new HashMap<>();
@@ -48,7 +52,6 @@ public class SpringControllerTestClassFactory {
 			bugCloudTestParams.put("handler", bugCloudTestAnnotation.handler());
 		}
 		factory = new AddAnnotationOfTestClass(factory, BugCloudTest.class,bugCloudTestParams);
-		
 		// 添加日志对象
 		factory = new AddFieldOfTestClass(factory, Log.class, "log");
 		// 添加WebContext对象
@@ -70,9 +73,9 @@ public class SpringControllerTestClassFactory {
 		beforeAnnotationParams.put(Autowired.class, null);
 		factory = new AbstractAddMethodOfTestClass(factory, "before", null, beforeAnnotationParams) {
 			@Override
-			public String body() {
+			public String body(CtClass ctClass) {
 				// 在测试启动前初始化MockMvc对象
-				return "mock = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(webContext).build();";
+				return "{mock = org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup(webContext).build();}";
 			}
 		};
 
@@ -84,38 +87,38 @@ public class SpringControllerTestClassFactory {
 			String testMethodName = "test" + m.getName().substring(0, 1).toUpperCase() + m.getName().substring(1);
 			// 根据controller的不同类型注解选择不同的方法工厂创建测试方法
 			if (m.getAnnotation(GetMapping.class) != null) {
-				factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null, testMethodAnnotationParams);
+				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(PostMapping.class) != null) {
-				factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null, testMethodAnnotationParams);
+				factory = new AddHttpPostOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(PutMapping.class) != null) {
-				factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null, testMethodAnnotationParams);
+				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(DeleteMapping.class) != null) {
-				factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null, testMethodAnnotationParams);
+				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(PatchMapping.class) != null) {
-				factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null, testMethodAnnotationParams);
+				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(RequestMapping.class) != null) {
 				RequestMapping rms = m.getAnnotation(RequestMapping.class);
 				if (rms.method().length > 0) {
 					for (RequestMethod rm : rms.method()) {
 						switch (rm) {
 						case GET:
-							factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null,
+							factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
 									testMethodAnnotationParams);
 							break;
 						case HEAD:
 							break;
 						case POST:
-							factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null,
+							factory = new AddHttpPostOfTestMethod(factory, testMethodName,m, null,
 									testMethodAnnotationParams);
 							break;
 						case PUT:
-							factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null,
+							factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
 									testMethodAnnotationParams);
 							break;
 						case PATCH:
 							break;
 						case DELETE:
-							factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null,
+							factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
 									testMethodAnnotationParams);
 							break;
 						case OPTIONS:
@@ -125,7 +128,7 @@ public class SpringControllerTestClassFactory {
 						}
 					}
 				} else {
-					factory = new AddTestHttpGetMethodOfTestClass(factory, testMethodName, null,
+					factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
 							testMethodAnnotationParams);
 				}
 			}
