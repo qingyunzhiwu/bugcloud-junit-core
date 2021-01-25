@@ -58,12 +58,13 @@ public class AddHttpPostOfTestMethod extends AbstractAddMethodOfTestClass {
 			for (int i = 0; i < paramLen; i++) {
 				String paramName = attr.variableName(i + pos); // 参数名称
 				String paramType = srcMethod.getParameterTypes()[i].getName(); // 参数类型
-				String paramValue = HttpUtils.createPropertyValue(paramType);
+				Object paramValue = ParameterService.getInstance().createParameterValue(ctClass.getName(),
+						methodName, paramName, paramType);
 				String paramUse = ""; // 参数用途
 				if (ans[i] != null && ans[i].length > 0) {
 					for (Object pa : ans[i]) {
 						if (pa instanceof PathVariable) { // 如果是路径参数
-							url = this.pathParamHandler(url, paramName, paramValue);
+							url = this.pathParamHandler(url, paramName, (String)paramValue);
 							paramUse = "PathVariable";
 							break;
 						} else if (pa instanceof RequestParam) { // 如果是请求参数
@@ -71,7 +72,7 @@ public class AddHttpPostOfTestMethod extends AbstractAddMethodOfTestClass {
 							body.append("\n params.put(\"" + paramName + "\", \"" + paramValue + "\");");
 						} else if (pa instanceof RequestBody) { // 如果是Body请求参数
 							paramUse = "RequestBody";
-//						parameterValues.put(par.getName(), HttpUtils.createPropertyValue(par));
+							body.append("\n params.put(\"" + paramName + "\", \"" + paramValue + "\");");
 						}
 					}
 				} else {
