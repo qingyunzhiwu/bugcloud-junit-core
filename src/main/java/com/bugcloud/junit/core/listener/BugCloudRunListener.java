@@ -10,7 +10,7 @@ import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunListener;
 
 import com.alibaba.fastjson.JSONObject;
-import com.bugcloud.junit.core.annotation.BugCloudTest;
+import com.bugcloud.junit.core.annotation.PushReport;
 import com.bugcloud.junit.core.vo.RequestApiQuestionVo;
 
 import okhttp3.MediaType;
@@ -34,7 +34,7 @@ public class BugCloudRunListener extends RunListener {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void testRunFinished(Result result) throws Exception {
-		BugCloudTest bugCloudTest = this.testClass.getAnnotation(BugCloudTest.class);
+		PushReport bugCloudTest = this.testClass.getAnnotation(PushReport.class);
 		if (bugCloudTest == null) {
 			return;
 		}

@@ -17,39 +17,55 @@ import javassist.bytecode.annotation.StringMemberValue;
 public class JavassistUtils {
 	/**
 	 * 对象转MemberObj
+	 * 
 	 * @param obj
 	 * @param cp
 	 * @return
+	 * @throws Exception 
 	 */
-	public static MemberValue obj2MemberObj(Object obj, ConstPool cp) {
+	public static MemberValue obj2MemberObj(Object obj, ConstPool cp) throws Exception {
 		if (obj instanceof String) {
 			return new StringMemberValue((String) obj, cp);
 		} else if (obj instanceof Integer) {
-			return new IntegerMemberValue((Integer) obj, cp);
-		} else if (obj instanceof Integer) {
-			return new IntegerMemberValue((Integer) obj, cp);
+			IntegerMemberValue integerMemberValue = new IntegerMemberValue(cp);
+			integerMemberValue.setValue((Integer) obj);
+			return integerMemberValue; 
 		} else if (obj instanceof Boolean) {
-			return new BooleanMemberValue((Boolean) obj, cp);
+			BooleanMemberValue booleanMemberValue = new BooleanMemberValue( cp);
+			booleanMemberValue.setValue((Boolean) obj);
+			return booleanMemberValue;
 		} else if (obj instanceof Byte) {
-			return new ByteMemberValue((Byte) obj, cp);
+			ByteMemberValue byteMemberValue = new ByteMemberValue(cp);
+			byteMemberValue.setValue((Byte) obj);
+			return byteMemberValue;
 		} else if (obj instanceof Character) {
-			return new CharMemberValue((Character) obj, cp);
+			CharMemberValue charMemberValue = new CharMemberValue(cp);
+			charMemberValue.setValue((Character) obj);
+			return charMemberValue;
 		} else if (obj instanceof Class) {
 			String className = ((Class<?>) obj).getName();
 			return new ClassMemberValue(className, cp);
 		} else if (obj instanceof Double) {
-			return new DoubleMemberValue((Double) obj, cp);
+			DoubleMemberValue doubleMemberValue = new DoubleMemberValue(cp);
+			doubleMemberValue.setValue((Double) obj);
+			return doubleMemberValue;
 		} else if (obj instanceof Enum) {
 			EnumMemberValue emv = new EnumMemberValue(cp);
 			emv.setType(obj.getClass().getName());
 			emv.setValue(obj.toString());
 			return emv;
 		} else if (obj instanceof Float) {
-			return new FloatMemberValue((Float) obj, cp);
+			FloatMemberValue floatMemberValue = new FloatMemberValue(cp);
+			floatMemberValue.setValue((Float) obj);
+			return floatMemberValue;
 		} else if (obj instanceof Long) {
-			return new LongMemberValue((Long) obj, cp);
+			LongMemberValue longMemberValue = new LongMemberValue(cp);
+			longMemberValue.setValue((Long) obj);
+			return longMemberValue;
 		} else if (obj instanceof Short) {
-			return new ShortMemberValue((Short) obj, cp);
+			ShortMemberValue shortMemberValue = new ShortMemberValue(cp);
+			shortMemberValue.setValue((Short) obj);
+			return shortMemberValue;
 		} else {
 			return null;
 		}

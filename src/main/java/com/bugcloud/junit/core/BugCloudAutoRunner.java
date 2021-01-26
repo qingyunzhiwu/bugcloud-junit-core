@@ -14,6 +14,7 @@ import org.reflections.util.ConfigurationBuilder;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.SystemPropertyUtils;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -92,7 +93,8 @@ public class BugCloudAutoRunner extends Suite {
 			reflections = new Reflections(new ConfigurationBuilder().setUrls(resource.getURL())
 					.setScanners(new TypeAnnotationsScanner(), new SubTypesScanner(false)));
 			// 扫描包内带有@RequiresPermissions注解的所有方法集合
-			Set<Class<?>> clazzs = reflections.getTypesAnnotatedWith(RestController.class);
+			Set<Class<?>> clazzs = reflections.getTypesAnnotatedWith(Controller.class);
+			clazzs.addAll(reflections.getTypesAnnotatedWith(RestController.class));
 			return clazzs;
 		} catch (IOException e) {
 			e.printStackTrace();

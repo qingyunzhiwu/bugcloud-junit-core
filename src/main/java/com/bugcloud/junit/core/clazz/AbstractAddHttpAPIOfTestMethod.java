@@ -22,6 +22,11 @@ import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
 
+/**
+ * 添加测试http接口的方法
+ * @author yuzhantao
+ *
+ */
 public abstract class AbstractAddHttpAPIOfTestMethod extends AbstractAddMethodOfTestClass {
 	private Method srcMethod;
 

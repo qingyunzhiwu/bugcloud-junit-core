@@ -168,6 +168,44 @@ public class HttpUtils {
 				.andReturn().getResponse().getContentAsString(); // 将相应的数据转换为字符串
 
 	}
+	
+	public static void testPut(MockMvc mock, String url, Map<?, ?> params, Object body) throws Exception {
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.put(url) // 请求的url,请求的方法是post
+				.contentType(MediaType.APPLICATION_JSON);
+		if (body != null) {
+			builder = builder.content(JSON.toJSONString(body)); // 数据的格式
+		}
+		if (params != null) {
+			for (Map.Entry<?, ?> item : params.entrySet()) {
+				if (item.getValue() == null)
+					continue;
+				builder = builder.param((String) item.getKey(), (String) item.getValue()); // 添加参数
+			}
+		}
+		mock.perform(builder).andExpect(MockMvcResultMatchers.status().isOk()) // 返回的状态是200
+				.andDo(MockMvcResultHandlers.print()) // 打印出请求和相应的内容
+				.andReturn().getResponse().getContentAsString(); // 将相应的数据转换为字符串
+
+	}
+	
+	public static void testDelete(MockMvc mock, String url, Map<?, ?> params, Object body) throws Exception {
+		MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.delete(url) // 请求的url,请求的方法是post
+				.contentType(MediaType.APPLICATION_JSON);
+		if (body != null) {
+			builder = builder.content(JSON.toJSONString(body)); // 数据的格式
+		}
+		if (params != null) {
+			for (Map.Entry<?, ?> item : params.entrySet()) {
+				if (item.getValue() == null)
+					continue;
+				builder = builder.param((String) item.getKey(), (String) item.getValue()); // 添加参数
+			}
+		}
+		mock.perform(builder).andExpect(MockMvcResultMatchers.status().isOk()) // 返回的状态是200
+				.andDo(MockMvcResultHandlers.print()) // 打印出请求和相应的内容
+				.andReturn().getResponse().getContentAsString(); // 将相应的数据转换为字符串
+
+	}
 
 	/**
 	 * 获取网址

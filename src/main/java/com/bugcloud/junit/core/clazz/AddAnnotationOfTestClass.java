@@ -45,7 +45,6 @@ public class AddAnnotationOfTestClass extends AbstractTestClassDecorator {
 	@Override
 	public CtClass createTestClass(Class<?> clazz) throws Exception {
 		CtClass ctClass = super.createTestClass(clazz);
-
 		ClassFile classFile = ctClass.getClassFile();
 		ConstPool constpool = classFile.getConstPool();
 
@@ -75,7 +74,8 @@ public class AddAnnotationOfTestClass extends AbstractTestClassDecorator {
 					amv.setValue(mvs);
 					annotation.addMemberValue(param.getKey(), amv);
 				} else {
-					annotation.addMemberValue(param.getKey(), JavassistUtils.obj2MemberObj(param.getValue(), constpool));
+					MemberValue obj = JavassistUtils.obj2MemberObj(param.getValue(), constpool);
+					annotation.addMemberValue(param.getKey(), obj);
 				}
 			}
 		}

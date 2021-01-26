@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.bugcloud.junit.core.BugCloudSpringRunner;
-import com.bugcloud.junit.core.annotation.BugCloudTest;
 
 import javassist.CtClass;
 
@@ -33,26 +32,34 @@ public class SpringControllerTestClassFactory {
 		String className = clazz.getSimpleName() + "Test"; // 测试类的类名
 		String packageName = clazz.getPackage().getName(); // 测试类的包名
 		String longClassName = packageName + "." + className;// 测试类+包名
-		
+
 		ITestClassFactory factory = new TestClassFactory(className, packageName);
 		// 添加@RunWith注解
 		Map<String, Object> runWithParams = new HashMap<>();
 		runWithParams.put("value", BugCloudSpringRunner.class);
 		factory = new AddAnnotationOfTestClass(factory, RunWith.class, runWithParams);
-		// 添加@WebAppConfiguration注解
-		factory = new AddAnnotationOfTestClass(factory, WebAppConfiguration.class);
-		// 添加@SpringBootTest注解
-		factory = new AddAnnotationOfTestClass(factory, SpringBootTest.class);
-		// 添加@BugCloudTest注解
-		BugCloudTest bugCloudTestAnnotation = testClass.getAnnotation(BugCloudTest.class);
-		Map<String, Object> bugCloudTestParams = new HashMap<>();
-		if (bugCloudTestAnnotation != null) {
-			bugCloudTestParams.put("appKey", bugCloudTestAnnotation.appKey());
-			bugCloudTestParams.put("appSecret", bugCloudTestAnnotation.appSecret());
-			bugCloudTestParams.put("pusher", bugCloudTestAnnotation.pusher());
-			bugCloudTestParams.put("handler", bugCloudTestAnnotation.handler());
+		// 将单元测试类上的注解添加到动态创建的测试类上
+		Annotation[] anns = testClass.getAnnotations();
+		for (Annotation ann : anns) {
+			if (ann instanceof RunWith) {
+				continue;
+			}
+			Map<String, Object> annParams = new HashMap<>();
+			Method[] annMethods = ann.annotationType().getDeclaredMethods();
+			for(Method annMethod : annMethods) {
+				Object retAnnValue = annMethod.invoke(ann);
+				annParams.put(annMethod.getName(), retAnnValue);
+			}
+			factory = new AddAnnotationOfTestClass(factory, ann.annotationType(),annParams);
 		}
-		factory = new AddAnnotationOfTestClass(factory, BugCloudTest.class,bugCloudTestParams);
+		// 添加@WebAppConfiguration注解
+		if (testClass.getAnnotation(WebAppConfiguration.class) == null) {
+			factory = new AddAnnotationOfTestClass(factory, WebAppConfiguration.class);
+		}
+		// 添加@SpringBootTest注解
+		if (testClass.getAnnotation(SpringBootTest.class) == null) {
+			factory = new AddAnnotationOfTestClass(factory, SpringBootTest.class);
+		}
 		// 添加日志对象
 		factory = new AddFieldOfTestClass(factory, Log.class, "log");
 		// 添加WebContext对象
@@ -88,38 +95,38 @@ public class SpringControllerTestClassFactory {
 			String testMethodName = "test" + m.getName().substring(0, 1).toUpperCase() + m.getName().substring(1);
 			// 根据controller的不同类型注解选择不同的方法工厂创建测试方法
 			if (m.getAnnotation(GetMapping.class) != null) {
-				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
+				factory = new AddHttpGetOfTestMethod(factory, testMethodName, m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(PostMapping.class) != null) {
-				factory = new AddHttpPostOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
+				factory = new AddHttpPostOfTestMethod(factory, testMethodName, m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(PutMapping.class) != null) {
-				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
+				factory = new AddHttpPutOfTestMethod(factory, testMethodName, m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(DeleteMapping.class) != null) {
-				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
+				factory = new AddHttpDeleteOfTestMethod(factory, testMethodName, m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(PatchMapping.class) != null) {
-				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
+//				factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null, testMethodAnnotationParams);
 			} else if (m.getAnnotation(RequestMapping.class) != null) {
 				RequestMapping rms = m.getAnnotation(RequestMapping.class);
 				if (rms.method().length > 0) {
 					for (RequestMethod rm : rms.method()) {
 						switch (rm) {
 						case GET:
-							factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
+							factory = new AddHttpGetOfTestMethod(factory, testMethodName, m, null,
 									testMethodAnnotationParams);
 							break;
 						case HEAD:
 							break;
 						case POST:
-							factory = new AddHttpPostOfTestMethod(factory, testMethodName,m, null,
+							factory = new AddHttpPostOfTestMethod(factory, testMethodName, m, null,
 									testMethodAnnotationParams);
 							break;
 						case PUT:
-							factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
+							factory = new AddHttpPutOfTestMethod(factory, testMethodName, m, null,
 									testMethodAnnotationParams);
 							break;
 						case PATCH:
 							break;
 						case DELETE:
-							factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
+							factory = new AddHttpDeleteOfTestMethod(factory, testMethodName, m, null,
 									testMethodAnnotationParams);
 							break;
 						case OPTIONS:
@@ -129,8 +136,7 @@ public class SpringControllerTestClassFactory {
 						}
 					}
 				} else {
-					factory = new AddHttpGetOfTestMethod(factory, testMethodName,m, null,
-							testMethodAnnotationParams);
+					factory = new AddHttpGetOfTestMethod(factory, testMethodName, m, null, testMethodAnnotationParams);
 				}
 			}
 		}

@@ -73,7 +73,7 @@ public class ParameterService {
 				isMatch = Pattern.matches(rp.parameterName(), parameterName);
 				if (!isMatch && "".equals(rp.parameterName()) == false)
 					continue;
-				if (rp.parameterType() != Object.class && paramType.equals(rp.parameterType().getName()) == false) {
+				if (paramType.equals(m.getReturnType().getName()) == false) {
 					continue;
 				}
 				return (String) m.invoke(createInstance, new Object[] {});

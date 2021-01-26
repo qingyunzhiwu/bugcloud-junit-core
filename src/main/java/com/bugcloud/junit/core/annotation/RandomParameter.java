@@ -30,9 +30,4 @@ public @interface RandomParameter {
 	 * @return
 	 */
 	String parameterName() default "";
-	/**
-	 * 参数类型
-	 * @return
-	 */
-	Class<?> parameterType() default Object.class;
 }
