@@ -1,11 +1,12 @@
 # bugpush-junit-core
 
 #### 介绍
-BugCloud JUint core是Bug Cloud推出的Java 单元测试功能包，用于减少开发人员在待援测试过程中的代码量，并可将测试结果发送到Bug系统，提高开发、管理项目的效率。
+BugCloud JUint Core是Bug Cloud推出的Java 单元测试功能包，用于减少开发人员在单元测试过程中的代码量，并可将测试结果发送到Bug系统，提高开发、管理项目的效率。
 
 #### 软件架构
 BugCloud Junit core  以Spring Boot 2、JUnit 4 为基类,在此基础添加问题报告自动推送Bug系统、自动扫描Controller类并添加接口测试功能，使开发人员可以通过添加简单注解快速进行单元测试。
-![](static/images/readme-framework.png)
+
+![image](/qingyunzhiwu/bugcloud-junit-core/blob/master/src/main/resources/static/images/readme-framework.png)
 
 #### 安装教程
 ##### Gradle
