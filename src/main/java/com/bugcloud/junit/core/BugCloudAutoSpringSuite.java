@@ -21,13 +21,19 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bugcloud.junit.core.annotation.AutoTestScan;
 import com.bugcloud.junit.core.clazz.ParameterService;
 import com.bugcloud.junit.core.clazz.SpringControllerTestClassFactory;
+import com.google.common.base.Preconditions;
 
-public class BugCloudAutoRunner extends Suite {
+/**
+ * 用于自动创建基于测试Spring项目的测试用例Runner
+ * @author yuzhantao
+ *
+ */
+public class BugCloudAutoSpringSuite extends Suite {
 //	private static final Log log = LogFactory.getLog(BugCloudAutoRunner.class);
 	private static Class<?>[] testClasses = null;
 	private static SpringControllerTestClassFactory controllerScriptFactory = new SpringControllerTestClassFactory(); // Controller类脚本工厂
 
-	public BugCloudAutoRunner(Class<?> klass, RunnerBuilder builder) throws Exception {
+	public BugCloudAutoSpringSuite(Class<?> klass, RunnerBuilder builder) throws Exception {
 		super(builder, klass, createTestControllerProxyClasses(klass));
 	}
 
@@ -39,7 +45,7 @@ public class BugCloudAutoRunner extends Suite {
 	 * @throws Exception
 	 */
 	private static Class<?>[] createTestControllerProxyClasses(Class<?> testCaseClass) throws Exception {
-		if (BugCloudAutoRunner.testClasses == null) {
+		if (BugCloudAutoSpringSuite.testClasses == null) {
 			String scanPackage = null;
 			AutoTestScan atc = testCaseClass.getAnnotation(AutoTestScan.class);
 			if (atc == null || atc.packageName() == null) {
@@ -48,7 +54,8 @@ public class BugCloudAutoRunner extends Suite {
 				scanPackage = atc.packageName();
 			}
 			Set<Class<?>> controllerClasses = scanControllerClass(scanPackage);
-			ParameterService.getInstance().addParameterCreateClass(testCaseClass, controllerClasses.stream().map(item->item.getName()+"Test").toArray(String[]::new));
+			ParameterService.getInstance().addParameterCreateClass(testCaseClass,
+					controllerClasses.stream().map(item -> item.getName() + "Test").toArray(String[]::new));
 			List<Class<?>> proxyClasses = new ArrayList<>();
 			for (Class<?> clazz : controllerClasses) {
 				Class<?> ctlClass = createProxyClass(testCaseClass, clazz);
@@ -56,9 +63,9 @@ public class BugCloudAutoRunner extends Suite {
 					proxyClasses.add(ctlClass);
 				}
 			}
-			BugCloudAutoRunner.testClasses = proxyClasses.toArray(new Class<?>[] {});
+			BugCloudAutoSpringSuite.testClasses = proxyClasses.toArray(new Class<?>[] {});
 		}
-		return BugCloudAutoRunner.testClasses;
+		return BugCloudAutoSpringSuite.testClasses;
 	}
 
 	/**
@@ -87,6 +94,7 @@ public class BugCloudAutoRunner extends Suite {
 					+ org.springframework.util.ClassUtils
 							.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(scanPackage));
 			Resource[] resources = resourcePatternResolver.getResources(packageSearchPath);
+			Preconditions.checkArgument(resources.length > 0, packageSearchPath + "下未扫描到需要测试的文件!");
 			Resource resource = resources[0];
 			// 设置扫描路径
 			Reflections reflections;

@@ -34,9 +34,9 @@ public class ParameterService {
 	/**
 	 * 添加参数创建类
 	 * 
-	 * @param createClass 可以创建参数值的类
-	 * @param useClass    使用创建类的其它类数组
-	 * @throws Exception
+	 * @param createClass 		可以创建参数值的类
+	 * @param useClassNames    	使用创建类的其它类数组
+	 * @throws Exception		
 	 */
 	public void addParameterCreateClass(Class<?> createClass, String[] useClassNames) throws Exception {
 		Object createObj = createClass.newInstance();
@@ -48,10 +48,11 @@ public class ParameterService {
 	/**
 	 * 获取参数值
 	 * 
-	 * @param useClass      使用创建类的测试类
-	 * @param method        测试方法
+	 * @param useClassName  使用创建类的测试类
+	 * @param methodName    测试方法
 	 * @param parameterName 参数名
-	 * @return
+	 * @param paramType 	参数类型
+	 * @return				返回创建的参数值
 	 * @throws Exception
 	 */
 	public Object createParameterValue(String useClassName, String methodName, String parameterName, String paramType)
