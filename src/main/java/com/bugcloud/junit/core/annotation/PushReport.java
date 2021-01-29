@@ -35,9 +35,4 @@ public @interface PushReport {
 	 * @return
 	 */
 	boolean isPush() default true;
-	/**
-	 * 是否断言推送报告的异常
-	 * @return
-	 */
-	boolean isAssertPushException() default true;
 }

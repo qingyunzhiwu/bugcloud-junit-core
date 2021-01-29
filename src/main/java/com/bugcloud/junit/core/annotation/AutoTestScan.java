@@ -11,6 +11,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AutoTestScan {
 	String packageName() default "";
-	String host() default "127.0.0.1";
-	int port() default 8080;
 }

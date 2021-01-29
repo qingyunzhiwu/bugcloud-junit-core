@@ -87,9 +87,6 @@ public class BugCloudRunListener extends RunListener {
 			}
 		} catch (Exception e) {
 			sb.append("\n 提交问题接口失败\n local error:" + e.getMessage());
-			if (bugCloudTest.isAssertPushException()) {
-				throw e;
-			}
 		} finally {
 			sb.append("\n Test Class:" + this.testClass.getName() + " 测试完成=========================================");
 			logger.info(sb.toString());
