@@ -18,7 +18,9 @@ plugins {
 apply from: project.rootDir.canonicalPath + '/.settings/publish.gradle'
 
 group = 'com.bug-cloud'
-version = '0.0.2-RELEASE'
+artifactId = 'junit-core'
+// version = '0.0.2-SNAPSHOT'
+version = '0.0.2'
 sourceCompatibility = '1.8'
 
 repositories {
