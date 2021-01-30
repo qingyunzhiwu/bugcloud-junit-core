@@ -18,7 +18,7 @@ BugCloud Junit Core 以Spring Boot 2、JUnit 4 为基础,添加测试报告推�
 #### 安装
 ##### Gradle
 ```javascript
-testImplementation 'com.bug-cloud:bugcloud-junit-core:0.0.2-RELEASE'
+testImplementation 'com.bug-cloud:bugcloud-junit-core:0.0.2'
 ```
 
 ##### Maven
@@ -27,7 +27,7 @@ testImplementation 'com.bug-cloud:bugcloud-junit-core:0.0.2-RELEASE'
 <dependency>
   <groupId>com.bug-cloud</groupId>
   <artifactId>bugcloud-junit-core</artifactId>
-  <version>0.0.2-RELEASE</version>
+  <version>0.0.2</version>
   <type>module</type>
 </dependency>
 ```
